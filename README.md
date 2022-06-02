@@ -2,10 +2,6 @@
 
 
 Try running with these args:
-
-python3 bryon_sample_project.py --gran=0.05 --op=sphere
-![map1](https://user-images.githubusercontent.com/44587911/171583847-0303aa3a-3e03-443a-a828-81eee180ad31.png)
-
 python3 bryon_sample_project.py --gran=0.005 --sigma=0.3 --num_iter=1000000 --num_rand=50000 --op=sphere
 
 ![map10](https://user-images.githubusercontent.com/44587911/171586239-d755735e-b39b-4887-8ab3-5011440220e7.png)
@@ -13,6 +9,10 @@ python3 bryon_sample_project.py --gran=0.005 --sigma=0.3 --num_iter=1000000 --nu
 
 python3 bryon_sample_project.py --gran=0.005 --sigma=0.2 --num_iter=1000000 --num_rand=50000 --op=rastrigin
 ![map403](https://user-images.githubusercontent.com/44587911/171585426-2a116f7c-d979-4fd5-bb3e-1b9600d6eaa9.png)
+
+
+python3 bryon_sample_project.py --gran=0.05 --op=sphere
+![map1](https://user-images.githubusercontent.com/44587911/171583847-0303aa3a-3e03-443a-a828-81eee180ad31.png)
 
 
 python3 bryon_sample_project.py --gran=0.05 --op=rastrigin
