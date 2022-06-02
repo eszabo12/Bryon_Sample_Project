@@ -113,7 +113,9 @@ def visualize(archive):
     for j in range(archive.dims):
         vis[i][j] = archive.map[i][j].P
   sns.heatmap(vis)
+  plt.savefig('map' + str(np.random.randint(500,1000))+'.png')
   plt.show()
+  
   
 def map_elites(num_dim=3, num_iter=100000, num_rand=5000, gran=0.1, sigma=0.05, op="sphere"):
   archive = Map(num_dim, gran)
