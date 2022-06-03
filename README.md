@@ -8,3 +8,5 @@ python3 bryon_sample_project.py --gran=0.1 --sigma=0.1
 python3 bryon_sample_project.py --gran=0.1 --sigma=0.05
 
 (hopefully at this point you're using python3)
+
+python3 bryon_sample_project.py --sigma=0.05 --num_iter=10000000

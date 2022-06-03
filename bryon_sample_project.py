@@ -28,7 +28,18 @@ def rastrigin(vec, A=10):
 def rastrigin_batch(batch):
   return np.array([rastrigin(i) for i in batch])
 
-
+def bound(x):
+  if x < -1:
+    x = -1
+  elif x > 1:
+    x = 1
+  return x
+def bounds(x, left, right):
+  if x < left:
+    x = left
+  elif x > right:
+    x = right
+  return x
 class Content:
   def __init__(self, num_dim):
     self.X = np.full(num_dim, fill_value=np.nan)
@@ -41,6 +52,9 @@ class Map:
   def __init__(self, num_dim, gran=0.1):
     self.rng = default_rng()
     self.gran = gran
+    self.bounded = np.vectorize(bound)
+    self.bounds = np.vectorize(bounds)
+    self.inserted = []
     '''
     the main map object- the first value in the list at each cell is the solution
     and the second value is its performance. I initialized them to nan to distinguish
@@ -54,8 +68,19 @@ class Map:
 
   #map from a float in the range [-1, 1] to an integer in the range [0, self.dims - 1]
   def indices(self, b):
-    x, y = np.digitize(np.array(b)+1,bins=[self.gran*i for i in range(1, self.dims)])
-    return (x, y)
+    print("b:", b)
+
+    arr = np.array(b)
+    print("arr:", arr)
+
+    arr = np.multiply(np.divide(np.add(arr, 1.0), 2.0), (self.dims-0.000001))
+    # arr = self.bounds(arr, 0, 19.99999)
+    arr = np.trunc(arr)
+    x, y = arr
+    print("indices:" ,int(x), int(y))
+
+    # x, y = np.digitize(np.array(b)+1,bins=[self.gran*i for i in range(1, self.dims)])
+    return (int(x), int(y))
 
   def get(self, b):
     x, y = self.indices(b)
@@ -65,47 +90,50 @@ class Map:
     return (self.map[x][y].X, self.map[x][y].P)
 
   def set(self, b, X, P):
-    x, y = self.indices(b)
+    x, y = indices = self.indices(b)
+    if not indices in self.inserted:
+      print("inserted:", indices)
+      #insert into the insert array the tuple pair of indices
+      self.inserted.append(indices)
     self.map[x][y].X = X
     self.map[x][y].P = P
 
   def get_P(self, b):
     X, P = self.get(b)
     return P
+
   def is_empty(self, b):
-    return np.isnan(self.get_P(b))
-  #I made a wrapper because otherwise it would generate the same number twice
-  def rand_index(self):
-    return np.random.randint(0,self.dims-1)
+    return not self.indices(b) in self.inserted
+
   # uniformly selects a solution from the archive indices
   def random_selection(self):
-    x, y = self.rand_index(), self.rand_index()
-    while self.is_empty((x, y)):
-      x, y = self.rand_index(), self.rand_index()
+    x, y = self.inserted[self.rng.integers(0, len(self.inserted))]
     content = self.map[x][y]
     return content.X
 
   def generate_random(self, num_dim):
-    return self.rng.standard_normal(num_dim)
-
+    norm = self.rng.standard_normal(num_dim)
+    print("bounded:",self.bounded(norm))
+    return self.bounded(norm)
 
 def generate_variation(x, sigma=0.15):
-  x += random.gauss(0, sigma)
+  print("type of X:", str(type(x[0])))
+  x += np.random.normal(0, sigma)
   for i in range(x.size):
-    if x[i] < -1:
-      x[i] = -1
-    elif x[i] > 1:
-      x[i] = 1
+    if x[i] < -1.0:
+      x[i] = -1.0
+    elif x[i] > 1.0:
+      x[i] = 1.0
   return x
 
 def performance(x, op):
   if op=="sphere":
-    return -1*sphere(x)
+    return -sphere(x)
   elif op=="rastrigin":
-    return rastrigin(x)
+    return -rastrigin(x)
   else:
     print("bad input")
-    return -1*sphere(x)
+    return -sphere(x)
 
 def visualize(archive):
   vis = np.zeros((archive.dims, archive.dims))
@@ -120,6 +148,7 @@ def visualize(archive):
 def map_elites(num_dim=3, num_iter=100000, num_rand=5000, gran=0.1, sigma=0.05, op="sphere"):
   archive = Map(num_dim, gran)
   for i in range(num_iter):
+    print("iter:", i)
     if i < num_rand:
       x_p = archive.generate_random(num_dim)
     else:
@@ -128,7 +157,7 @@ def map_elites(num_dim=3, num_iter=100000, num_rand=5000, gran=0.1, sigma=0.05, 
     b = (x_p[0], x_p[1])
     p = performance(x_p, op)
     if archive.is_empty(b) or archive.get_P(b) < p:
-      archive.set(b, x_p, p)
+      archive.set(b, x_p.astype('float64'), p)
   visualize(archive)
 
 if __name__ == '__main__':
