@@ -28,13 +28,6 @@ def rastrigin(vec, A=10):
 def rastrigin_batch(batch):
   return np.array([rastrigin(i) for i in batch])
 
-def bound(x):
-  if x < -1:
-    x = -1
-  elif x > 1:
-    x = 1
-  return x
-
 class Content:
   def __init__(self, num_dim):
     self.X = np.full(num_dim, fill_value=np.nan)
@@ -47,7 +40,6 @@ class Map:
   def __init__(self, num_dim, gran=0.1):
     self.rng = default_rng()
     self.gran = gran
-    self.bounded = np.vectorize(bound)
     self.inserted = []
     '''
     the main map object- the first value in the list at each cell is the solution
@@ -66,9 +58,7 @@ class Map:
 
     arr = np.array(b)
     print("arr:", arr)
-
-    arr = np.multiply(np.divide(np.add(arr, 1.0), 2.0), (self.dims-0.000001))
-    # arr = self.bounds(arr, 0, 19.99999)
+    arr = ((arr+1)/2.0)*(self.dims-0.000001)
     arr = np.trunc(arr)
     x, y = arr
     print("indices:" ,int(x), int(y))
@@ -107,18 +97,12 @@ class Map:
 
   def generate_random(self, num_dim):
     norm = self.rng.standard_normal(num_dim)
-    print("bounded:",self.bounded(norm))
-    return self.bounded(norm)
+    return np.clip(norm, -1, 1)
 
 def generate_variation(x, sigma=0.15):
   print("type of X:", str(type(x[0])))
   x += np.random.normal(0, sigma)
-  for i in range(x.size):
-    if x[i] < -1.0:
-      x[i] = -1.0
-    elif x[i] > 1.0:
-      x[i] = 1.0
-  return x
+  return np.clip(x, -1, 1)
 
 def performance(x, op):
   if op=="sphere":
