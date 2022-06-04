@@ -14,15 +14,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 def sphere(vec):
-  return sum(i**2 for i in vec)
+  return sum(np.power(i, 2) for i in vec)
 
 def sphere_batch(batch):
   return np.array([sphere(i) for i in batch])
 
 def rastrigin(vec, A=10):
-  sum = A*vec.size
+  sum = np.multiply(A, vec.size)
   for i in vec:
-    sum += i**2 - A*np.cos(2*np.pi*i)
+    sum = np.add(sum, np.subtract(np.power(i, 2), np.multiply(A, np.cos(np.multiply(2, np.multiply(np.pi,i))))))
   return sum
 
 def rastrigin_batch(batch):
@@ -34,12 +34,7 @@ def bound(x):
   elif x > 1:
     x = 1
   return x
-def bounds(x, left, right):
-  if x < left:
-    x = left
-  elif x > right:
-    x = right
-  return x
+
 class Content:
   def __init__(self, num_dim):
     self.X = np.full(num_dim, fill_value=np.nan)
@@ -53,7 +48,6 @@ class Map:
     self.rng = default_rng()
     self.gran = gran
     self.bounded = np.vectorize(bound)
-    self.bounds = np.vectorize(bounds)
     self.inserted = []
     '''
     the main map object- the first value in the list at each cell is the solution
